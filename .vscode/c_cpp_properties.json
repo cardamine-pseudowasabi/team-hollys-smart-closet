@@ -3,7 +3,11 @@
         {
             "name": "Win32",
             "includePath": [
+                "C:\\Users\\yoseo\\Documents\\Arduino\\libraries\\Arduino_LED_matrix_sketch-master",
+                "C:\\Users\\yoseo\\Documents\\Arduino\\libraries\\DHT.h",
                 "C:\\Users\\yoseo\\Documents\\Arduino\\libraries\\EtherCard\\src",
+                "C:\\Users\\yoseo\\Documents\\Arduino\\libraries\\LiquidCrystal_I2C-master",
+                "C:\\Users\\yoseo\\Documents\\Arduino\\libraries\\MsTimer2-master",
                 "C:\\Program Files (x86)\\Arduino\\libraries\\Ethernet\\src",
                 "C:\\Program Files (x86)\\Arduino\\tools\\**",
                 "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\**"

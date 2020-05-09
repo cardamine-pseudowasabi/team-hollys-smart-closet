@@ -1,0 +1,6 @@
+{
+    "board": "arduino:avr:uno",
+    "port": "COM4",
+    "programmer": "AVRISP mkII",
+    "sketch": "WiFi-Weather-Display-Rx.ino"
+}

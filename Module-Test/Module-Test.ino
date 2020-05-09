@@ -1,4 +1,4 @@
-// Stepper module test
+// Stepper motor module test
 #include <Stepper.h>
 
 const int stepsPerRevolution = 50;

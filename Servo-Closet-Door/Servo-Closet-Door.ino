@@ -14,6 +14,9 @@ void setup() {
     pinMode(motion_pin, INPUT);
 
     closeopen_status = 0;
+
+    servo_pos = 120;
+    myservo.write(servo_pos);
 }
 
 void loop() {
@@ -23,10 +26,10 @@ void loop() {
 
     if(motion_read == HIGH){ // 모션 감지 될 때
         if(!closeopen_status){ // 현재 옷장이 닫혀 있는 상태라면
-            for (servo_pos = 0; servo_pos <= 120; servo_pos += 1) { // 옷장 문 열기
+            for (servo_pos = 120; servo_pos >= 0; servo_pos -= 1) { // 옷장 문 열기
                 myservo.write(servo_pos);
-                delay(20);
-            }
+                delay(15);
+            }       
             closeopen_status = 1; // 옷장이 열려 있는 상태
         }
         not_motion_count = 0; // 모션이 감지되어 카운트 초기화
@@ -36,10 +39,10 @@ void loop() {
     }
 
     delay(500);
-    if(not_motion_count == 10){ // 열 번 카운트 하는 동안 모션 감지 안 되었으면
-        for (servo_pos = 120; servo_pos >= 0; servo_pos -= 1) { // 옷장 문 닫기
+    if(closeopen_status == 1 && not_motion_count == 10){ // 열 번 카운트 하는 동안 모션 감지 안 되었으면
+        for (servo_pos = 0; servo_pos <= 120; servo_pos += 1) { // 옷장 문 닫기
             myservo.write(servo_pos);
-            delay(20);
+            delay(15);
         }
         not_motion_count = 0; // 카운트 초기화
         closeopen_status = 0; // 옷장이 닫혀 있는 상태
@@ -48,8 +51,8 @@ void loop() {
     if(!closeopen_status){ Serial.print("Closed");}
     else { Serial.print("Open!");}
     Serial.print("\tCount: ");
-    Serial.println("not_motion_count");
-    
+    Serial.println(not_motion_count);
+
     delay(500);
 }
 

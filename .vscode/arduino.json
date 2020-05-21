@@ -2,6 +2,6 @@
     "port": "COM6",
     "board": "arduino:avr:mega",
     "programmer": "AVRISP mkII",
-    "sketch": "Servo-Closet-Door\\Servo-Closet-Door.ino",
+    "sketch": "DHT_DC_FAN\\DHT_DC_FAN.ino",
     "configuration": "cpu=atmega2560"
 }

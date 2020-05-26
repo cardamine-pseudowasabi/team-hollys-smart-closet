@@ -55,20 +55,23 @@ NexTouch *nex_listen_list[] = { // 터치했을때 이벤트가 발생하는 요
 void b0PopCallback(void *ptr) {  // b0 버튼(door open)
     doorAngle = 60;
     doorServo.write(doorAngle);
+    Serial.println("Door open!");
 }
 
 void b1PopCallback(void *ptr) {  // b1 버튼(door close)
     doorAngle = 180;
     doorServo.write(doorAngle);
+    Serial.println("Door Close!");
 }
 
 void b2PopCallback(void *ptr) {  // b2 버튼(왼쪽 방향 버튼)
     /*angle = angle + 90;
     servo2.write(angle);*/
 
+    Serial.println("Stepper motor: CCW");
     if(Serial1.available()){
         Serial1.write(2);
-        Serial.println("Stepper motor: CCW");
+        Serial.println("ACK");
     }
 }  
 
@@ -76,9 +79,10 @@ void b3PopCallback(void *ptr) { // b3 버튼(오른쪽 방향 버튼)
     /*angle = angle - 90;
     servo2.write(angle);*/
 
+    Serial.println("Stepper motor: CW");
     if(Serial1.available()){
         Serial1.write(5);
-        Serial.println("Stepper motor: CW");
+        Serial.println("ACK");
     }
 }
 
@@ -87,6 +91,7 @@ void getHumidity() {            // 습도 측정
     char hTemp[10] = {0}; 
     utoa(int(h), hTemp, 10);
     t1.setText(hTemp); 
+    //Serial.println(h);
 }
 
 void on_off() {                 // 습도에 따른 제습모드 on_off  
@@ -100,8 +105,12 @@ void on_off() {                 // 습도에 따른 제습모드 on_off
 }
 
 void setup() {
+    dhtModule.begin();
     // for monitoring
     Serial.begin(9600);
+
+    // Mega <-> Touch Screen
+    Serial3.begin(9600);
     
     // Mega <-> Uno UART communication -> Serial1 object (19:Rx, 18:Tx)
     Serial1.begin(9600);
@@ -140,4 +149,16 @@ void loop() {
     }                                                                                                                                                                           
 
     nexLoop(nex_listen_list);
+
+    // Sub -> Main 데이터 받아오기
+    // 이 데이터를 다시 스마트폰으로 던져줄 것
+    static String prevData, currentData;
+    if(Serial1.available()){
+        currentData = Serial1.readString();
+        
+        if(prevData != currentData){
+            Serial.print(currentData);
+            prevData = currentData;
+        }
+    }
 }

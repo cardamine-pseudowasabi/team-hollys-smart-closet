@@ -1,8 +1,8 @@
 // Arduino Uno (Sub Controller part)
-// 1. UART communication with Main-Controller
-// 2. UART communication with NodeMCU
-// 3. 1602 LCD Display
-// 4. Stepper motor control
+// 1. UART communication with Main-Controller   [Done]
+// 2. UART communication with NodeMCU           [Done]
+// 3. 1602 LCD Display                          [Done]
+// 4. Stepper motor control                     [Yet]
 #include <SoftwareSerial.h>
 #include <LiquidCrystal_I2C.h>
 #include <Stepper.h>

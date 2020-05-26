@@ -1,10 +1,10 @@
 // Arduino Mega2560 (Main Controller part)
-// 1. Touch Screen
-// 2. DHT Sensing
-// 3. Door Control (Servo motor)
-// 4. Communication with Smartphone (Bluetooth)
-// 5. Motion Sensing
-// 6. Communication with Sub-Controller (UART)
+// 1. Touch Screen                              [Done]
+// 2. DHT Sensing - DC FAN, Display Info        [Done]
+// 3. Door Control (Servo motor)                [Done]
+// 4. Communication with Smartphone (Bluetooth) [Yet]
+// 5. Motion Sensing                            [Yet]
+// 6. Communication with Sub-Controller (UART)  [Done]
 #include <SoftwareSerial.h>
 #include <Servo.h>
 #include <Nextion.h>
@@ -16,6 +16,7 @@ const int dhtPin = 4;
 const int doorPin = 9;
 const int btRx = 10;
 const int btTx = 11;
+const int dcfanPin = 44;
 
 // declaration class instances
 SoftwareSerial btSerial(btTx, btRx);
@@ -97,14 +98,17 @@ void getHumidity() {            // 습도 측정
 void on_off() {                 // 습도에 따른 제습모드 on_off  
     float h = dhtModule.readHumidity();
     if(h >= 70) {
-        t3.setText("ON");       // fan도 작동시켜야됨
+        t3.setText("ON");       // fan도 작동
+        digitalWrite(dcfanPin, HIGH);
     }
     else {
         t3.setText("OFF");
+        digitalWrite(dcfanPin, LOW);
     }
 }
 
 void setup() {
+    pinMode(dcfanPin, OUTPUT);
     dhtModule.begin();
     // for monitoring
     Serial.begin(9600);

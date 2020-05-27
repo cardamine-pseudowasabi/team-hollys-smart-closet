@@ -16,7 +16,7 @@ const int dhtPin = 4;
 const int doorPin = 9;
 const int btRx = 10;
 const int btTx = 11;
-const int dcfanPin = 44;
+const int dcfanPin = 44;    
 
 // declaration class instances
 SoftwareSerial btSerial(btTx, btRx);
@@ -70,10 +70,10 @@ void b2PopCallback(void *ptr) {  // b2 버튼(왼쪽 방향 버튼)
     servo2.write(angle);*/
 
     Serial.println("Stepper motor: CCW");
-    if(Serial1.available()){
+    //if(Serial1.available()){
         Serial1.write(2);
-        Serial.println("ACK");
-    }
+       // Serial.println("ACK");
+    //}
 }  
 
 void b3PopCallback(void *ptr) { // b3 버튼(오른쪽 방향 버튼)
@@ -81,10 +81,10 @@ void b3PopCallback(void *ptr) { // b3 버튼(오른쪽 방향 버튼)
     servo2.write(angle);*/
 
     Serial.println("Stepper motor: CW");
-    if(Serial1.available()){
+    //if(Serial1.available()){
         Serial1.write(5);
-        Serial.println("ACK");
-    }
+       // Serial.println("ACK");
+    //}
 }
 
 void getHumidity() {            // 습도 측정
@@ -92,7 +92,7 @@ void getHumidity() {            // 습도 측정
     char hTemp[10] = {0}; 
     utoa(int(h), hTemp, 10);
     t1.setText(hTemp); 
-    //Serial.println(h);
+    Serial.println(h);
 }
 
 void on_off() {                 // 습도에 따른 제습모드 on_off  

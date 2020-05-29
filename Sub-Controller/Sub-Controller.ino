@@ -18,8 +18,8 @@ String serialRead;
 SoftwareSerial fromMain(4, 5);
 //SoftwareSerial fromNodeMCU(7, 8); // 이유는 모르겠지만 이렇게 하면 fromMain이 작동하지 않음
 
-const int stepsPerRevolution = 50;
-Stepper myStepper(50, 8, 9, 10, 11);
+const int stepsPerRevolution = 512;
+Stepper myStepper(stepsPerRevolution, 8, 9, 10, 11);
 
 int motorControl = 0;
 String read_data, temperature, weather_info;
@@ -36,7 +36,7 @@ void setup() {
 }
 
 unsigned long fromMain_prev = 0;            // millis 함수을 위한 변수
-unsigned long delay_val = 10000;
+unsigned long delay_val = 2000;
 unsigned long LCD_prev = 0;
 
 void loop() {
@@ -91,4 +91,6 @@ void loop() {
     }
     
     //delay(50);
+    /*myStepper.step(stepsPerRevolution);
+    delay(500);*/
 }

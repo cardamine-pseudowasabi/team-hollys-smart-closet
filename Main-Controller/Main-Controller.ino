@@ -16,7 +16,7 @@ const int dhtPin = 4;
 const int doorPin = 9;
 const int btRx = 10;
 const int btTx = 11;
-const int dcfanPin = 44;    
+const int dcfanPin = 44;
 
 // declaration class instances
 SoftwareSerial btSerial(btTx, btRx);
@@ -24,8 +24,12 @@ Servo doorServo;
 int doorAngle = 180;
 DHT dhtModule(dhtPin, DHT11);
 
+float humidity;
+
 // enable/disable motion detect
 boolean enableMotionDetect = false;
+
+boolean isDoorOpen = false;
 
 // for touch screen (Nextion)
 unsigned long t1_prev = 0;            // millis 함수을 위한 변수
@@ -54,15 +58,21 @@ NexTouch *nex_listen_list[] = { // 터치했을때 이벤트가 발생하는 요
 };
 
 void b0PopCallback(void *ptr) {  // b0 버튼(door open)
-    doorAngle = 60;
-    doorServo.write(doorAngle);
+    if(!isDoorOpen){
+        doorAngle = 60;
+        doorServo.write(doorAngle);
+    }
     Serial.println("Door open!");
+    isDoorOpen = true;
 }
 
 void b1PopCallback(void *ptr) {  // b1 버튼(door close)
-    doorAngle = 180;
-    doorServo.write(doorAngle);
+    if(isDoorOpen){
+        doorAngle = 180;
+        doorServo.write(doorAngle);
+    }
     Serial.println("Door Close!");
+    isDoorOpen = false;
 }
 
 void b2PopCallback(void *ptr) {  // b2 버튼(왼쪽 방향 버튼)
@@ -88,11 +98,11 @@ void b3PopCallback(void *ptr) { // b3 버튼(오른쪽 방향 버튼)
 }
 
 void getHumidity() {            // 습도 측정
-    float h = dhtModule.readHumidity();
+    humidity = dhtModule.readHumidity();
     char hTemp[10] = {0}; 
-    utoa(int(h), hTemp, 10);
+    utoa(int(humidity), hTemp, 10);
     t1.setText(hTemp); 
-    Serial.println(h);
+    Serial.println(humidity);
 }
 
 void on_off() {                 // 습도에 따른 제습모드 on_off  
@@ -143,6 +153,7 @@ void loop() {
     if(t1_now - t1_prev >= t1_delay) {
         t1_prev = t1_now;
         getHumidity();
+        btSerial.print("H"+String.valueOf(humidity));
     }
 
     unsigned long t2_now = millis();
@@ -164,5 +175,7 @@ void loop() {
             Serial.print(currentData);
             prevData = currentData;
         }
+
+        btSerial.print("W"+currentData);
     }
 }

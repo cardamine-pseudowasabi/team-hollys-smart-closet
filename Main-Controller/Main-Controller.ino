@@ -168,15 +168,17 @@ const String command_bt[command_bt_num] = {
 
 void loop() {
     // setting bluetooth module
-    if(btSerial.available()){Serial.write(btSerial.read());}
-    if(Serial.available()){btSerial.write(Serial.read());}
+/*    if(btSerial.available()){Serial.write(btSerial.read());}
+    if(Serial.available()){btSerial.write(Serial.read());}*/
 
     unsigned long t1_now = millis();
 
     if(t1_now - t1_prev >= t1_delay) {
         t1_prev = t1_now;
         getHumidity();
-        btSerial.print("H"+String.valueOf(humidity));
+        //String temptemp = "H" + String(humidity);
+        //Serial.print(temptemp);
+        //btSerial.print(temptemp);
     }
 
     unsigned long t2_now = millis();
@@ -205,14 +207,17 @@ void loop() {
 
     if(btSerial.available()){
         String read_data_bt = btSerial.readString();
+        //Serial.println(read_data_bt);
         int now_command = -1;
+        read_data_bt.trim();
         for(int i=0;i<command_bt_num;++i){
             if(!read_data_bt.compareTo(command_bt[i])){ // match
                 now_command = i;
                 break;
             }
         }
-
+        Serial.print("now: ");
+        Serial.println(now_command);
         switch(now_command){
         case 0: // Stepper left
             step_left();
@@ -232,7 +237,6 @@ void loop() {
         case 5: // Motion disable
             enableMotionDetect = false;
             break;
-        default:
         }
     }
 
@@ -271,4 +275,7 @@ void loop() {
 
         delay(500);*/
     }
+
+    /*Serial.print("door state: ");
+    Serial.println(isDoorOpen);*/
 }

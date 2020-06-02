@@ -11,6 +11,8 @@
 
 #### ※ 모델링 시안 및 전체 동작 모식도는 Design Outputs 폴더에서 확인 가능
 
+#### ※ Main-Controller (Mega2560), Sub-Controller (Uno), WiFi-Weather-Tx (NodeMCU), team-hollys-smart-closet-app (Android)
+
 #### To-Do List (05-28ver. 6차 오프라인 미팅 이후):
 1. 전체 회로 연결하여 동작 확인: 디스플레이 부분은 터치스크린 1 EA, 1602 LCD 1 EA 사용 **Clear**
 2. Android application 개발: Android Studio 이용 (Bluetooth 통신 가능 여부 점검 완료: HC-06 이용)

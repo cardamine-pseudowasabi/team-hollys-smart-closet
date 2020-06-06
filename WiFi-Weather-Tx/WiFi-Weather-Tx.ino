@@ -22,7 +22,7 @@ SoftwareSerial WiFi2Ardu(3, 1); // GPIO 3 = RX, GPIO 1 = TX
 const char* ssid = my_ssid;  // AP SSID
 const char* password = my_pw; // AP password
 
-const char * rss = "/wid/queryDFSRSS.jsp?zone=1129070500";
+const char * rss = "/wid/queryDFSRSS.jsp?zone=4111156600";
 const char * server = "www.kma.go.kr";
 const int port_num = 80;
 

@@ -18,7 +18,7 @@ String serialRead;
 SoftwareSerial fromMain(4, 5);
 //SoftwareSerial fromNodeMCU(7, 8); // 이유는 모르겠지만 이렇게 하면 fromMain이 작동하지 않음
 
-const int stepsPerRevolution = 512;
+const int stepsPerRevolution = 52;
 Stepper myStepper(stepsPerRevolution, 8, 9, 10, 11);
 
 int motorControl = 0;

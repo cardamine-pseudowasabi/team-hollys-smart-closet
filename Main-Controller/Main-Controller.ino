@@ -2,13 +2,15 @@
 // 1. Touch Screen                              [Done]
 // 2. DHT Sensing - DC FAN, Display Info        [Done]
 // 3. Door Control (Servo motor)                [Done]
-// 4. Communication with Smartphone (Bluetooth) [Yet]
+// 4. Communication with Smartphone (Bluetooth) [Done]
 // 5. Motion Sensing                            [Yet]
 // 6. Communication with Sub-Controller (UART)  [Done]
+// 7. Voice Guidance                            [Yet]
 #include <SoftwareSerial.h>
 #include <Servo.h>
 #include <Nextion.h>
 #include <DHT.h>
+#include <DFPlayer_Mini_Mp3.h>
 
 // pin numbering
 const int motionPin = 3;
@@ -17,7 +19,8 @@ const int doorPin = 9;
 const int btRx = 10;
 const int btTx = 11;
 const int dcfanPin = 44;
-const int audioGuidancePin = 50;
+//const int audioGuidancePin = 50;
+const int rainAlertPin = 53;
 
 // declaration class instances
 SoftwareSerial btSerial(btTx, btRx);
@@ -32,6 +35,13 @@ boolean enableMotionDetect;
 int not_motion_count;
 
 boolean isDoorOpen;
+boolean isRain;
+
+// mp3 module playback length
+const int delay_dat[] = {11000, 5000, 3000, 3000, 3000, 4000, 4000, 4000, 4000, 4000};
+unsigned long t3_prev = 0;
+unsigned long t3_delay = 0;
+boolean t3_available = false; // 재생 signal이 꼬이지 않도록 처리하는 변수
 
 // for touch screen (Nextion)
 unsigned long t1_prev = 0;            // millis 함수을 위한 변수
@@ -61,15 +71,22 @@ NexTouch *nex_listen_list[] = { // 터치했을때 이벤트가 발생하는 요
 
 void doorOpenProc(){
     if(!isDoorOpen){
-        digitalWrite(audioGuidancePin, HIGH);
+/*        digitalWrite(audioGuidancePin, HIGH);
         delay(10);
-        digitalWrite(audioGuidancePin, LOW);
+        digitalWrite(audioGuidancePin, LOW);*/
 
+        if(t3_available){
+            t3_delay = delay_dat[0];
+            t3_available = false;
+            mp3_play(1);
+        }
+        
         doorAngle = 60;
         doorServo.write(doorAngle);
     }
     Serial.println("Door open!");
     isDoorOpen = true;
+
 }
 
 void doorCloseProc(){
@@ -79,16 +96,34 @@ void doorCloseProc(){
     }
     Serial.println("Door Close!");
     isDoorOpen = false;
+
+    if(t3_available){
+        t3_delay = delay_dat[1];
+        t3_available = false;
+        mp3_play(2);
+    }
 }
 
 void step_left(){
     Serial.println("Stepper motor: CCW");
     Serial1.write(2);
+
+    if(t3_available){
+        t3_delay = delay_dat[2];
+        t3_available = false;
+        mp3_play(3);
+    }
 }
 
 void step_right(){
     Serial.println("Stepper motor: CW");
     Serial1.write(5);
+
+    if(t3_available){
+        t3_delay = delay_dat[3];
+        t3_available = false;
+        mp3_play(4);
+    }
 }
 
 void b0PopCallback(void *ptr) {  // b0 버튼(door open)
@@ -145,6 +180,12 @@ void setup() {
     doorServo.attach(doorPin);
     doorServo.write(doorAngle);
 
+    // Mega <-> Mp3 Module Information Communication
+    Serial2.begin(9600);
+    mp3_set_serial (Serial2);  //set Serial for DFPlayer-mini mp3 module 
+    delay(1);
+    mp3_set_volume (30);
+
     // touch screen
     nexInit();
     b0.attachPop(b0PopCallback,&b0);          
@@ -154,6 +195,11 @@ void setup() {
 
     enableMotionDetect = isDoorOpen = false;
     not_motion_count = 0;
+
+    t3_available = true;
+
+    isRain = false;
+    pinMode(rainAlertPin, OUTPUT);
 }
 
 const int command_bt_num = 6;
@@ -190,6 +236,12 @@ void loop() {
 
     nexLoop(nex_listen_list);
 
+    unsigned long t3_now = millis();
+    if(!t3_available && (t3_now - t3_prev >= t3_delay)){
+        t3_prev = t3_now;
+        t3_available = true;
+    }
+
     // Sub -> Main 데이터 받아오기
     // 이 데이터를 다시 스마트폰으로 던져줄 것
     static String prevData, currentData;
@@ -203,6 +255,18 @@ void loop() {
 
         btSerial.print(String("H")+String(humidity));
         btSerial.print(String("W")+currentData);
+
+        int index_weather = currentData.indexOf("$");
+        if(index_weather != -1){
+            char rainy_check = currentData[index_weather+1];
+            if(rainy_check == 'R'){
+                isRain = true;
+            }
+        }
+    }
+
+    if(isRain){
+        digitalWrite(rainAlertPin, HIGH);
     }
 
     if(btSerial.available()){

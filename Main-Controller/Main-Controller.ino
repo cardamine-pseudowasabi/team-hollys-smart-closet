@@ -3,9 +3,9 @@
 // 2. DHT Sensing - DC FAN, Display Info        [Done]
 // 3. Door Control (Servo motor)                [Done]
 // 4. Communication with Smartphone (Bluetooth) [Done]
-// 5. Motion Sensing                            [Yet]
+// 5. Motion Sensing                            [Done]
 // 6. Communication with Sub-Controller (UART)  [Done]
-// 7. Voice Guidance                            [Yet]
+// 7. Voice Guidance                            [Done]
 #include <SoftwareSerial.h>
 #include <Servo.h>
 #include <Nextion.h>
@@ -32,16 +32,20 @@ float humidity;
 
 // enable/disable motion detect
 boolean enableMotionDetect;
-int not_motion_count;
+unsigned long motion_now;
+unsigned long motion_prev = 0;
+unsigned long motion_delay = 15000; // 문 열림 동작 기준으로 15초 .. 한 번이라도 움직인다면 카운트 초기화
+boolean not_motion = false;
 
 boolean isDoorOpen;
 boolean isRain;
 
 // mp3 module playback length
-const int delay_dat[] = {11000, 5000, 3000, 3000, 3000, 4000, 4000, 4000, 4000, 4000};
+const int delay_dat[] = {11000, 5000, 3000, 3000, 3000, 4000, 4000, 4000, 4000, 4000, 4000, 4000};
 unsigned long t3_prev = 0;
 unsigned long t3_delay = 0;
 boolean t3_available = false; // 재생 signal이 꼬이지 않도록 처리하는 변수
+
 
 // for touch screen (Nextion)
 unsigned long t1_prev = 0;            // millis 함수을 위한 변수
@@ -147,7 +151,7 @@ void getHumidity() {            // 습도 측정
     char hTemp[10] = {0}; 
     utoa(int(humidity), hTemp, 10);
     t1.setText(hTemp); 
-    Serial.println(humidity);
+    //Serial.println(humidity);
 }
 
 void on_off() {                 // 습도에 따른 제습모드 on_off  
@@ -194,7 +198,7 @@ void setup() {
     b3.attachPop(b3PopCallback,&b3);
 
     enableMotionDetect = isDoorOpen = false;
-    not_motion_count = 0;
+//    not_motion_count = 0;
 
     t3_available = true;
 
@@ -297,47 +301,64 @@ void loop() {
             break;
         case 4: // Motion enable
             enableMotionDetect = true;
+            if(t3_available){
+                t3_delay = delay_dat[10];
+                t3_available = false;
+                mp3_play(11);
+            }
             break;
         case 5: // Motion disable
             enableMotionDetect = false;
+            if(t3_available){
+                t3_delay = delay_dat[11];
+                t3_available = false;
+                mp3_play(12);
+            }
             break;
         }
     }
 
     if(enableMotionDetect){
         // millis로 바꾸고 코드 수정해야함
-        /*
+        
         int motion_read = digitalRead(motionPin);
         Serial.print("motion info: ");
         Serial.print(motion_read);
 
+        motion_now = millis();
         if(motion_read == HIGH){ // 모션 감지 될 때
-            if(!isDoorOpen){ // 현재 옷장이 닫혀 있는 상태라면
+            if(!isDoorOpen && t3_available){ // 현재 옷장이 닫혀 있는 상태라면
                 doorServo.write(60);
-                isDoorOpen = true; // 옷장이 열려 있는 상태
+                //isDoorOpen = true; // 옷장이 열려 있는 상태
+                doorOpenProc();
             }
-            not_motion_count = 0; // 모션이 감지되어 카운트 초기화
+            //not_motion_count = 0; // 모션이 감지되어 카운트 초기화
+            not_motion = false;
+            motion_prev = motion_now;
         }
         else {
-            ++ not_motion_count; // 모션 감지 안 될 때 우선 카운트
-        }
-
-        delay(500);
-        if(isDoorOpen && not_motion_count == 20){ // 열 번 카운트 하는 동안 모션 감지 안 되었으면
-            for (servo_pos = 0; servo_pos <= 120; servo_pos += 1) { // 옷장 문 닫기
-                myservo.write(servo_pos);
-                delay(15);
+            //++ not_motion_count; // 모션 감지 안 될 때 우선 카운트
+            if(isDoorOpen){
+                not_motion = true;
+    
+                if(motion_now - motion_prev >= motion_delay) {
+                    //motion_prev = motion_now;
+                    //isDoorOpen = false;
+                    doorCloseProc();
+                }
             }
-            not_motion_count = 0; // 카운트 초기화
-            isDoorOpen = 0; // 옷장이 닫혀 있는 상태
         }
+        Serial.print(motion_read);
+        Serial.print("  : ");
+        Serial.println(motion_now - motion_prev);
+        
+        /*if(isDoorOpen && not_motion_count == 20){ // 열 번 카운트 하는 동안 모션 감지 안 되었으면
+            doorServo.write(180);
+            isDoorOpen = false; // 옷장이 닫혀 있는 상태
+        }*/
         Serial.print("\t");
         if(!isDoorOpen){ Serial.print("Closed");}
         else { Serial.print("Open!");}
-        Serial.print("\tCount: ");
-        Serial.println(not_motion_count);
-
-        delay(500);*/
     }
 
     /*Serial.print("door state: ");

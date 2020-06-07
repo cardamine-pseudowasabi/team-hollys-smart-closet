@@ -26,6 +26,8 @@ const char * rss = "/wid/queryDFSRSS.jsp?zone=4111156600";
 const char * server = "www.kma.go.kr";
 const int port_num = 80;
 
+String tx_data;
+boolean tx_data_updated = false;
 
 void setup() {
 	Serial.begin(9600);
@@ -78,7 +80,12 @@ void loop() {
 	}
 
 	if(temperature.length() && weather_info.length()){
-		WiFi2Ardu.print(String(temperature)+"'C$"+weather_info+"#");
+        if(!tx_data_updated){
+            tx_data = String(temperature)+"'C$"+weather_info+"#";
+            tx_data_updated = true;
+        }
+        Serial.println(tx_data);
+        WiFi2Ardu.print(tx_data);
 		digitalWrite(LED_BUILTIN, HIGH);
 	} // $ = concatenate, # = terminate
 

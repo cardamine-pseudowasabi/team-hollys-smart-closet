@@ -10,21 +10,11 @@
  **이지환**: 회로 설계 및 모델링 담당 (/Design Outputs)  
 
 #### ※ 모델링 시안 및 전체 동작 모식도는 Design Outputs 폴더에서 확인 가능
+#### ※ 각 모듈별 코드 파일
+ - **Main-Controller.ino** : Arduino Mega2560  
+ - **Sub-Controller.ino** : Arduino Uno  
+ - **WiFi-Weather-Tx** : NodeMCU ESP8266 WiFi Board  
+ - **https://github.com/y0s30b/team-hollys-smart-closet-app** : Android application part
 
-#### ※ Main-Controller (Mega2560), Sub-Controller (Uno), WiFi-Weather-Tx (NodeMCU), team-hollys-smart-closet-app (Android)
-
-#### To-Do List (05-28ver. 6차 오프라인 미팅 이후):
-1. 전체 회로 연결하여 동작 확인: 디스플레이 부분은 터치스크린 1 EA, 1602 LCD 1 EA 사용 **Clear**
-2. Android application 개발: Android Studio 이용 (Bluetooth 통신 가능 여부 점검 완료: HC-06 이용)
-    - 옷장 상태 - 옷장의 Embedded Display 부분과 같은 내용 출력 및 모터 제어
-    - 옷에 관련된 CRUD
-3. 옷을 넣는 것에 대한 자동 옷 분류 매커니즘 연구 (imagenet) **Discard**
-4. 프레임 배송 도착 시(12주 예정) 외장 조립 
-    - 경첩 부착 **Clear**
-    - 옷은 옷 사진 프린트 및 코팅 후 무게 추를 다는 것으로 대체할 예정
-    - 디스플레이 부분 변경된 사항 적용하여 새로 포맥스 깎기 **Clear**
-5. 미세먼지 데이터 관련 API Key 새로운 곳에서 받아오기 (SK Planet 해당 서비스 금월 종료)
-6. 기상 상황 정보에 따른 옷장 구역 분할 재설정 - 현재 날씨 / 일교차 / 강수 상황 고려
-7. TTS 및 음성 인식 기능 추가 고려 중 (미확정)
-8. 이미지를 통한 옷 분류의 대안으로 무게 센서를 이용한 옷을 넣는 방법 고려 중 (미확정)
-9. **새로운 문제** 스텝 모터 오차 및 전원 안정화 [가장 중요 !!!]
+#### ※ 최종 시연 영상
+ - **https://youtu.be/QIkXosZEXfA**

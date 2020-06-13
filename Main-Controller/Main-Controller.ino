@@ -25,16 +25,17 @@ const int rainAlertPin = 53;
 const int deodorantPin = 22;
 
 // deodorant mode
-unsigned long deo_now;
+//unsigned long deo_now;
 unsigned long deo_prev;
-unsigned long deo_delay = 10000;
+unsigned long deo_delay = 9000;
 boolean deo_activate = false;
 boolean deo_available = false;
 // 점멸 기능
-unsigned long deo_t_now;
+//unsigned long deo_t_now;
 unsigned long deo_t_prev;
-unsigned long deo_t_delay = 1000;
+unsigned long deo_t_delay = 1500;
 boolean deo_t_onoff = false;
+int deo_count;
 
 // declaration class instances
 SoftwareSerial btSerial(btTx, btRx);
@@ -55,7 +56,7 @@ boolean isDoorOpen;
 boolean isRain;
 
 // mp3 module playback length
-const int delay_dat[] = {11000, 5000, 3000, 3000, 3000, 4000, 4000, 4000, 4000, 4000, 4000, 4000};
+const int delay_dat[] = {11000, 5000, 3000, 3000, 3000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000};
 unsigned long t3_prev = 0;
 unsigned long t3_delay = 0;
 boolean t3_available = false; // 재생 signal이 꼬이지 않도록 처리하는 변수
@@ -117,7 +118,7 @@ void doorCloseProc(){
             deodo_available
         }*/
 
-        deo_prev = deo_now;
+        deo_prev = millis();
         deo_activate = true;
     }
     Serial.println("Door Close!");
@@ -227,6 +228,7 @@ void setup() {
     isRain = false;
     pinMode(rainAlertPin, OUTPUT);
     pinMode(deodorantPin, OUTPUT);
+    pinMode(LED_BUILTIN, OUTPUT);
 }
 
 const int command_bt_num = 6;
@@ -264,25 +266,12 @@ void loop() {
     nexLoop(nex_listen_list);
 
     unsigned long t3_now = millis();
-    unsigned long deo_t_now = millis();
+    //Serial.println(t3_available);
     if(!t3_available && (t3_now - t3_prev >= t3_delay)){
         t3_prev = t3_now;
         t3_available = true;
-        digitalWrite(deodorantPin, LOW);
-        deo_available = false;
-    }
-    else {
-        if(deo_available){
-            if(deo_t_now - deo_t_prev >= deo_t_delay){
-                if(!deo_t_onoff){
-                    digitalWrite(deodorantPin, HIGH);
-                }
-                else {
-                    digitalWrite(deodorantPin, LOW);
-                }
-                deo_t_onoff = !deo_t_onoff;
-            }
-        }
+        //digitalWrite(deodorantPin, LOW);
+        //deo_available = false;
     }
 
     // Sub -> Main 데이터 받아오기
@@ -407,16 +396,47 @@ void loop() {
     Serial.println(isDoorOpen);*/
 
     // deodorant mode
+    unsigned long deo_now = millis();
     if(deo_activate){
         if(deo_now - deo_prev >= deo_delay){
             if(t3_available){
                 t3_delay = delay_dat[12];
                 t3_available = false;
                 mp3_play(13);
-                deo_activate = false;
-                deo_available = true;
-                deo_t_prev = deo_t_now;
+                
+                deo_activate = false; // 이 모드 진입 변수 해제
+                deo_available = true; // LED 점멸 시작
+                deo_t_prev = millis();
+
+                deo_count = 0;
+                deo_t_onoff = false;
             }
         }
+        Serial.println(deo_now - deo_prev);
+    }
+
+    unsigned long deo_t_now = millis();
+    if(deo_available){
+        if(deo_t_now - deo_t_prev >= deo_t_delay){
+            if(!deo_t_onoff){
+                digitalWrite(deodorantPin, HIGH);
+                Serial.print("HIGH");
+                digitalWrite(LED_BUILTIN, HIGH);
+            }
+            else {
+                digitalWrite(deodorantPin, LOW);
+                Serial.print("LOW");
+                digitalWrite(LED_BUILTIN, LOW);
+                ++ deo_count;
+            }
+            deo_t_onoff = !deo_t_onoff;
+            deo_t_prev = deo_t_now;
+        }
+        digitalWrite(dcfanPin, HIGH);
+    }
+
+    if(deo_count >= 3){
+        deo_available = false;
+        digitalWrite(dcfanPin, LOW);
     }
 }

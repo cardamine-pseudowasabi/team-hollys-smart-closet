@@ -2,7 +2,7 @@
 // 1. UART communication with Main-Controller   [Done]
 // 2. UART communication with NodeMCU           [Done]
 // 3. 1602 LCD Display                          [Done]
-// 4. Stepper motor control                     [Yet]
+// 4. Stepper motor control                     [Done]
 #include <SoftwareSerial.h>
 #include <LiquidCrystal_I2C.h>
 #include <Stepper.h>
@@ -24,6 +24,9 @@ Stepper myStepper(stepsPerRevolution, 8, 9, 10, 11);
 int motorControl = 0;
 String read_data, temperature, weather_info;
 
+int ClothSectionType;
+int CurrentSectionType;
+
 void setup() {
     Serial.begin(9600);
     fromMain.begin(9600);
@@ -33,6 +36,9 @@ void setup() {
     lcd.backlight();
 
     myStepper.setSpeed(60);
+
+    ClothSectionType = -1;
+    CurrentSectionType = 0; // 현재 옷 구역을 0 (여름 옷 구역)으로 초기화
 }
 
 unsigned long fromMain_prev = 0;            // millis 함수을 위한 변수
@@ -53,6 +59,33 @@ void loop() {
         Serial.println(temperature);
         Serial.print("Weather Info: ");
         Serial.println(weather_info);
+
+        //int k = temperature.indexOf(".");
+        temperature = temperature.substring(0, temperature.indexOf("."));
+        // 소수점 버리고 정수형으로만 자르기
+        int intTemp = temperature.toInt();
+
+        // 기온 상태에 따라 옷장 회전
+        if(intTemp > 24){ // 여름 옷 구역
+            ClothSectionType = 0;
+        }
+        else if(intTemp > 16 && intTemp <= 24){ // 봄 옷 구역 (봄/가을 얇은 옷 구역)
+            ClothSectionType = 1;
+        }
+        else if(intTemp > 9 && intTemp <= 16){ // 가을 옷 구역 (봄/가을 두꺼운 옷 구역)
+            ClothSectionType = 2;
+        }
+        else { // 겨울 옷 구역
+            ClothSectionType = 3;
+        }
+
+        // 현재 옷 구역과 추천 옷 구역이 다른 경우, 옷장을 회전한다.
+        if(ClothSectionType != -1){
+            if(ClothSectionType != CurrentSectionType){
+                myStepper.step((ClothSectionType - CurrentSectionType) * stepsPerRevolution);
+                delay(500);
+            }
+        }
     }
     
     if(LCD_now - LCD_prev >= delay_val) { // 일정 주기로 LCD에 write
@@ -66,8 +99,9 @@ void loop() {
         lcd.print(weather_info);
     }
     
-    // 서보 모터 제어 루틴
+    // 스텝 모터 제어 루틴
     if(fromMain.available()){ // 비동기 통신 (UART) 활성화
+        // Mega2560 보드로부터 모터 제어 데이터를 수신하고, 그에 따라 스텝 모터를 회전
         motorControl = fromMain.read();
         Serial.println(motorControl);
         
@@ -83,6 +117,7 @@ void loop() {
         }
     }
 
+    // 현재 처리한 데이터를 Mega2560 보드로 전송
     unsigned long fromMain_now = millis();
     if(fromMain_now - fromMain_prev >= delay_val) {
         fromMain_prev = fromMain_now;

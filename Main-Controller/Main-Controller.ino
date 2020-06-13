@@ -6,6 +6,7 @@
 // 5. Motion Sensing                            [Done]
 // 6. Communication with Sub-Controller (UART)  [Done]
 // 7. Voice Guidance                            [Done]
+// 8. Deodorant Mode                            [Yet]
 #include <SoftwareSerial.h>
 #include <Servo.h>
 #include <Nextion.h>
@@ -21,6 +22,19 @@ const int btTx = 11;
 const int dcfanPin = 44;
 //const int audioGuidancePin = 50;
 const int rainAlertPin = 53;
+const int deodorantPin = 22;
+
+// deodorant mode
+unsigned long deo_now;
+unsigned long deo_prev;
+unsigned long deo_delay = 10000;
+boolean deo_activate = false;
+boolean deo_available = false;
+// 점멸 기능
+unsigned long deo_t_now;
+unsigned long deo_t_prev;
+unsigned long deo_t_delay = 1000;
+boolean deo_t_onoff = false;
 
 // declaration class instances
 SoftwareSerial btSerial(btTx, btRx);
@@ -56,6 +70,7 @@ unsigned long t2_delay = 1000;
 NexButton b0 = NexButton(0,5,"b0");   // 터치스크린의 button,text,picture 객체선언 
 NexButton b1 = NexButton(0,6,"b1");
 NexButton b2 = NexButton(0,9,"b2");
+
 NexButton b3 = NexButton(0,10,"b3");
 
 NexText t1 = NexText(0,1,"t1");
@@ -97,6 +112,13 @@ void doorCloseProc(){
     if(isDoorOpen){
         doorAngle = 180;
         doorServo.write(doorAngle);
+
+        /*if(!deodo_available){
+            deodo_available
+        }*/
+
+        deo_prev = deo_now;
+        deo_activate = true;
     }
     Serial.println("Door Close!");
     isDoorOpen = false;
@@ -204,6 +226,7 @@ void setup() {
 
     isRain = false;
     pinMode(rainAlertPin, OUTPUT);
+    pinMode(deodorantPin, OUTPUT);
 }
 
 const int command_bt_num = 6;
@@ -241,9 +264,25 @@ void loop() {
     nexLoop(nex_listen_list);
 
     unsigned long t3_now = millis();
+    unsigned long deo_t_now = millis();
     if(!t3_available && (t3_now - t3_prev >= t3_delay)){
         t3_prev = t3_now;
         t3_available = true;
+        digitalWrite(deodorantPin, LOW);
+        deo_available = false;
+    }
+    else {
+        if(deo_available){
+            if(deo_t_now - deo_t_prev >= deo_t_delay){
+                if(!deo_t_onoff){
+                    digitalWrite(deodorantPin, HIGH);
+                }
+                else {
+                    digitalWrite(deodorantPin, LOW);
+                }
+                deo_t_onoff = !deo_t_onoff;
+            }
+        }
     }
 
     // Sub -> Main 데이터 받아오기
@@ -265,6 +304,9 @@ void loop() {
             char rainy_check = currentData[index_weather+1];
             if(rainy_check == 'R'){
                 isRain = true;
+            }
+            else {
+                isRain = false;
             }
         }
     }
@@ -363,4 +405,18 @@ void loop() {
 
     /*Serial.print("door state: ");
     Serial.println(isDoorOpen);*/
+
+    // deodorant mode
+    if(deo_activate){
+        if(deo_now - deo_prev >= deo_delay){
+            if(t3_available){
+                t3_delay = delay_dat[12];
+                t3_available = false;
+                mp3_play(13);
+                deo_activate = false;
+                deo_available = true;
+                deo_t_prev = deo_t_now;
+            }
+        }
+    }
 }

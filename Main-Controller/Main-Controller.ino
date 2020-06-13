@@ -6,7 +6,7 @@
 // 5. Motion Sensing                            [Done]
 // 6. Communication with Sub-Controller (UART)  [Done]
 // 7. Voice Guidance                            [Done]
-// 8. Deodorant Mode                            [Yet]
+// 8. Deodorant Mode                            [Done]
 #include <SoftwareSerial.h>
 #include <Servo.h>
 #include <Nextion.h>
@@ -56,7 +56,7 @@ boolean isDoorOpen;
 boolean isRain;
 
 // mp3 module playback length
-const int delay_dat[] = {11000, 5000, 3000, 3000, 3000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000};
+const int delay_dat[13] = {11000, 5000, 4000, 4000, 3000, 4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000};
 unsigned long t3_prev = 0;
 unsigned long t3_delay = 0;
 boolean t3_available = false; // 재생 signal이 꼬이지 않도록 처리하는 변수
@@ -99,6 +99,7 @@ void doorOpenProc(){
             t3_delay = delay_dat[0];
             t3_available = false;
             mp3_play(1);
+            t3_prev = millis();
         }
         
         doorAngle = 60;
@@ -128,6 +129,7 @@ void doorCloseProc(){
         t3_delay = delay_dat[1];
         t3_available = false;
         mp3_play(2);
+        t3_prev = millis();
     }
 }
 
@@ -139,6 +141,7 @@ void step_left(){
         t3_delay = delay_dat[2];
         t3_available = false;
         mp3_play(3);
+        t3_prev = millis();
     }
 }
 
@@ -150,6 +153,7 @@ void step_right(){
         t3_delay = delay_dat[3];
         t3_available = false;
         mp3_play(4);
+        t3_prev = millis();
     }
 }
 
@@ -268,7 +272,7 @@ void loop() {
     unsigned long t3_now = millis();
     //Serial.println(t3_available);
     if(!t3_available && (t3_now - t3_prev >= t3_delay)){
-        t3_prev = t3_now;
+        //t3_prev = t3_now;
         t3_available = true;
         //digitalWrite(deodorantPin, LOW);
         //deo_available = false;
@@ -336,6 +340,7 @@ void loop() {
                 t3_delay = delay_dat[10];
                 t3_available = false;
                 mp3_play(11);
+                t3_prev = millis();
             }
             break;
         case 5: // Motion disable
@@ -344,6 +349,7 @@ void loop() {
                 t3_delay = delay_dat[11];
                 t3_available = false;
                 mp3_play(12);
+                t3_prev = millis();
             }
             break;
         }
@@ -396,47 +402,50 @@ void loop() {
     Serial.println(isDoorOpen);*/
 
     // deodorant mode
-    unsigned long deo_now = millis();
-    if(deo_activate){
-        if(deo_now - deo_prev >= deo_delay){
-            if(t3_available){
-                t3_delay = delay_dat[12];
-                t3_available = false;
-                mp3_play(13);
-                
-                deo_activate = false; // 이 모드 진입 변수 해제
-                deo_available = true; // LED 점멸 시작
-                deo_t_prev = millis();
-
-                deo_count = 0;
-                deo_t_onoff = false;
+    if(!isDoorOpen){
+        unsigned long deo_now = millis();
+        if(deo_activate){
+            if(deo_now - deo_prev >= deo_delay){
+                if(t3_available){
+                    t3_delay = delay_dat[12];
+                    t3_available = false;
+                    mp3_play(13);
+                    t3_prev = millis();
+                    
+                    deo_activate = false; // 이 모드 진입 변수 해제
+                    deo_available = true; // LED 점멸 시작
+                    deo_t_prev = millis();
+    
+                    deo_count = 0;
+                    deo_t_onoff = false;
+                }
             }
+            Serial.println(deo_now - deo_prev);
         }
-        Serial.println(deo_now - deo_prev);
-    }
-
-    unsigned long deo_t_now = millis();
-    if(deo_available){
-        if(deo_t_now - deo_t_prev >= deo_t_delay){
-            if(!deo_t_onoff){
-                digitalWrite(deodorantPin, HIGH);
-                Serial.print("HIGH");
-                digitalWrite(LED_BUILTIN, HIGH);
+    
+        unsigned long deo_t_now = millis();
+        if(deo_available){
+            if(deo_t_now - deo_t_prev >= deo_t_delay){
+                if(!deo_t_onoff){
+                    digitalWrite(deodorantPin, HIGH);
+                    Serial.print("HIGH");
+                    digitalWrite(LED_BUILTIN, HIGH);
+                }
+                else {
+                    digitalWrite(deodorantPin, LOW);
+                    Serial.print("LOW");
+                    digitalWrite(LED_BUILTIN, LOW);
+                    ++ deo_count;
+                }
+                deo_t_onoff = !deo_t_onoff;
+                deo_t_prev = deo_t_now;
             }
-            else {
-                digitalWrite(deodorantPin, LOW);
-                Serial.print("LOW");
-                digitalWrite(LED_BUILTIN, LOW);
-                ++ deo_count;
-            }
-            deo_t_onoff = !deo_t_onoff;
-            deo_t_prev = deo_t_now;
+            digitalWrite(dcfanPin, HIGH);
         }
-        digitalWrite(dcfanPin, HIGH);
-    }
-
-    if(deo_count >= 3){
-        deo_available = false;
-        digitalWrite(dcfanPin, LOW);
+    
+        if(deo_count >= 3){
+            deo_available = false;
+            digitalWrite(dcfanPin, LOW);
+        }
     }
 }

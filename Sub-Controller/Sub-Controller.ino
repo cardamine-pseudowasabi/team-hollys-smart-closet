@@ -61,9 +61,11 @@ void loop() {
         Serial.println(weather_info);
 
         //int k = temperature.indexOf(".");
-        temperature = temperature.substring(0, temperature.indexOf("."));
-        // 소수점 버리고 정수형으로만 자르기
+        /*temperature = temperature.substring(0, temperature.indexOf("."));
+        // 소수점 버리고 정수형으로만 자르기*/
         int intTemp = temperature.toInt();
+
+        //Serial.println(intTemp);
 
         // 기온 상태에 따라 옷장 회전
         if(intTemp > 24){ // 여름 옷 구역
@@ -80,7 +82,7 @@ void loop() {
         }
 
         // 현재 옷 구역과 추천 옷 구역이 다른 경우, 옷장을 회전한다.
-        if(ClothSectionType != -1){
+        if(ClothSectionType != -1/* && intTemp != 0*/){
             if(ClothSectionType != CurrentSectionType){
                 myStepper.step((ClothSectionType - CurrentSectionType) * stepsPerRevolution);
                 delay(500);

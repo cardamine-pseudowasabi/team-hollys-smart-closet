@@ -17,11 +17,16 @@
  - **https://github.com/y0s30b/team-hollys-smart-closet-app** : Android application part
 
 #### ※ Final Results
- - **최종 시연 영상: https://youtu.be/QIkXosZEXfA**  
+ - **최종 시연 영상　:link: https://youtu.be/QIkXosZEXfA**  
  
-   [![Watch the video](https://img.youtube.com/vi/QIkXosZEXfA/hqdefault.jpg)](https://youtu.be/QIkXosZEXfA)  
+   <kbd>[![Watch the video](https://img.youtube.com/vi/QIkXosZEXfA/hqdefault.jpg)](https://youtu.be/QIkXosZEXfA)</kbd>
 
+ - **:newspaper: 졸업발표회 포스터**  
+   <div>
+      <kbd><img width="480" src="https://github.com/y0s30b/team-hollys-smart-closet/blob/master/%EC%A1%B8%EC%97%85%EB%B0%9C%ED%91%9C%ED%9A%8C%20%ED%8F%AC%EC%8A%A4%ED%84%B0%20Team%20Hollys.png"></kbd>
+   </div> 
+ 
  - **온라인 졸업발표회 :star:우수작:star: 선정**  
    <div>
-      <img width="480" src="https://github.com/y0s30b/team-hollys-smart-closet/blob/master/%EC%9A%B0%EC%88%98%EC%9E%91%ED%92%88%EC%83%81%20%EC%83%81%EC%9E%A5%20Team%20Hollys.JPG" />
+      <kbd><img width="480" src="https://github.com/y0s30b/team-hollys-smart-closet/blob/master/%EC%9A%B0%EC%88%98%EC%9E%91%ED%92%88%EC%83%81%20%EC%83%81%EC%9E%A5%20Team%20Hollys.JPG"></kbd>
    </div>

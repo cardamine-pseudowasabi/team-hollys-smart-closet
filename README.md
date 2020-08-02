@@ -6,7 +6,7 @@
 #### 2020-1학기 종합설계프로젝트 ICE3037 (성균관대학교 전자전기공학부 졸업작품)  
 #### 팀원: 권구현, 김요섭, 이지환  
  **권구현**: 팀장 (총괄 및 회계), 디스플레이 모듈 담당 (user.name = nine-shine)  
- **김요섭**: S/W 담당 (user.name = y0s30b, chocolate-wasabi)  
+ **김요섭**: S/W 담당 (user.name = pseudowasabi, pseudo-wasabi)  
  **이지환**: 회로 설계 및 모델링 담당 (/Design Outputs)  
 
 #### ※ 모델링 시안 및 전체 동작 모식도는 Design Outputs 폴더에서 확인 가능
